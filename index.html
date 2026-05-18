@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadasa - taller operaciones</title>
+    
+    <!-- Configuración para Acceso Directo / Web App (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cadasa Taller">
+    <meta name="theme-color" content="#dc2626">
+    
+    <!-- Enlace al Web App Manifest para PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Íconos de la App -->
+    <link rel="icon" type="image/png" href="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png">
+    <link rel="apple-touch-icon" href="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            900: '#7f1d1d',
+                        },
+                        dark: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        accent: {
+                            500: '#ea580c',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-red': '0 0 10px rgba(220, 38, 38, 0.5)',
+                        'glass': '0 4px 30px rgba(0, 0, 0, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast notification */
+        #toast {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #toast.show { transform: translateY(0); opacity: 1; }
+
+        /* Loader */
+        .loader-ring {
+            display: inline-block; position: relative; width: 80px; height: 80px;
+        }
+        .loader-ring div {
+            box-sizing: border-box; display: block; position: absolute;
+            width: 64px; height: 64px; margin: 8px;
+            border: 6px solid #dc2626; border-radius: 50%;
+            animation: loader-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: #dc2626 transparent transparent transparent;
+        }
+        .loader-ring div:nth-child(1) { animation-delay: -0.45s; }
+        .loader-ring div:nth-child(2) { animation-delay: -0.3s; }
+        .loader-ring div:nth-child(3) { animation-delay: -0.15s; }
+        @keyframes loader-ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide sections initially */
+        .app-view { display: none; }
+        .app-view.active { display: block; }
+    </style>
+</head>
+<body class="antialiased font-sans text-gray-300">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 glass-panel border-l-4 border-brand-600 text-white px-6 py-3 rounded-r shadow-lg flex items-center space-x-3">
+        <i data-lucide="info" class="text-brand-500"></i>
+        <span id="toast-msg" class="font-medium">Mensaje</span>
+    </div>
+
+    <!-- Full Screen Loader -->
+    <div id="global-loader" class="fixed inset-0 bg-dark-900/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center hidden">
+        <div class="loader-ring"><div></div><div></div><div></div><div></div></div>
+        <h2 class="text-brand-500 font-display text-2xl font-bold mt-4 tracking-wider uppercase">Conectando...</h2>
+        <p class="text-gray-400 mt-2 text-sm" id="loader-msg">Sincronizando con la nube</p>
+    </div>
+
+    <!-- Layout Container -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 glass-panel flex flex-col transition-transform duration-300 fixed inset-y-0 left-0 z-40 transform -translate-x-full md:relative md:translate-x-0 border-r border-gray-800">
+            <!-- Logo -->
+            <div class="h-16 flex items-center px-4 border-b border-gray-800">
+                <div class="flex items-center space-x-2 text-white">
+                    <img src="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png" alt="Logo Cadasa" class="w-9 h-9 object-contain" onerror="this.style.display='none'">
+                    <span class="font-display font-bold text-base tracking-wide uppercase">CADASA <span class="text-brand-600">TALLER</span></span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <p class="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Menú Principal</p>
+                
+                <button onclick="switchView('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-dark-800 hover:text-white transition-colors bg-dark-800/50 text-white border-l-2 border-brand-600" data-target="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard General</span>
+                </button>
+                
+                <button onclick="switchView('data')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-dark-800 hover:text-white transition-colors border-l-2 border-transparent" data-target="data">
+                    <i data-lucide="database" class="w-5 h-5"></i>
+                    <span class="font-medium">Datos de Flota</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-dark-800 via-dark-900 to-dark-950">
+            
+            <!-- Header -->
+            <header class="h-16 glass-header flex items-center justify-between px-4 sm:px-6 z-30">
+                <div class="flex items-center">
+                    <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white p-2 mr-2">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 id="page-title" class="text-xl font-display font-semibold text-white tracking-wide">Centro de Operaciones</h1>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- File Upload Input (Hidden) -->
+                    <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" class="hidden">
+                    
+                    <button onclick="document.getElementById('excel-file').click()" class="hidden sm:flex items-center space-x-2 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white px-3 py-1.5 rounded text-sm transition-colors">
+                        <i data-lucide="upload-cloud" class="w-4 h-4 text-brand-500"></i>
+                        <span>Importar Datos</span>
+                    </button>
+                    
+                    <div class="flex items-center space-x-2 pl-4 border-l border-gray-700">
+                        <button onclick="fetchSupabaseData()" title="Refrescar Base de Datos" class="mr-2 text-gray-400 hover:text-white transition-colors">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                        <div class="w-8 h-8 rounded-full bg-brand-900 border border-brand-600 flex items-center justify-center text-brand-400">
+                            <i data-lucide="cloud" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 pb-20">
+                
+                <!-- Global Filter Bar -->
+                <div class="glass-panel p-4 rounded-xl mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <div class="p-2 bg-brand-900/30 rounded-lg text-brand-500 hidden sm:block">
+                            <i data-lucide="calendar" class="w-5 h-5"></i>
+                        </div>
+                        <select id="dateRangeSelect" class="w-full sm:w-auto bg-dark-900 border border-gray-700 text-sm rounded-lg px-4 py-2 text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors">
+                            <option value="all">Todo el Historial</option>
+                            <option value="today">Día (Hoy)</option>
+                            <option value="yesterday">Día (Ayer)</option>
+                            <option value="week">Semana (Últimos 7 días)</option>
+                            <option value="month">Mes (Este mes)</option>
+                            <option value="custom">Rango Personalizado...</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Date Range Inputs -->
+                    <div id="customDateRange" class="hidden flex-col sm:flex-row items-center gap-2 w-full sm:w-auto text-sm">
+                        <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <span class="text-gray-400">Desde:</span>
+                            <input type="date" id="dateFrom" class="w-full sm:w-auto bg-dark-900 border border-gray-700 rounded-lg px-2 py-1.5 text-gray-300 outline-none focus:border-brand-500">
+                        </div>
+                        <span class="text-gray-500 hidden sm:block">-</span>
+                        <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <span class="text-gray-400">Hasta:</span>
+                            <input type="date" id="dateTo" class="w-full sm:w-auto bg-dark-900 border border-gray-700 rounded-lg px-2 py-1.5 text-gray-300 outline-none focus:border-brand-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: DASHBOARD -->
+                <div id="view-dashboard" class="app-view active fade-in space-y-6">
+                    
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Card 1 -->
+                        <div class="glass-panel p-5 rounded-xl border-t-2 border-t-brand-600 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform"><i data-lucide="clock" class="w-24 h-24"></i></div>
+                            <div class="flex justify-between items-start relative z-10">
+                                <div>
+                                    <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Promedio Hrs Trabajadas</p>
+                                    <h3 class="text-3xl font-display font-bold text-white mt-1" id="kpi-hours">0</h3>
+                                </div>
+                                <div class="p-2 bg-brand-900/50 rounded-lg text-brand-500"><i data-lucide="activity"></i></div>
+                            </div>
+                            <div class="mt-4 flex items-center text-xs">
+                                <span class="text-green-400 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>Promedio</span>
+                                <span class="text-gray-500 ml-2">según filtro actual</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="glass-panel p-5 rounded-xl border-t-2 border-t-green-500 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform"><i data-lucide="target" class="w-24 h-24"></i></div>
+                            <div class="flex justify-between items-start relative z-10">
+                                <div>
+                                    <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Eficiencia Operacional</p>
+                                    <h3 class="text-3xl font-display font-bold text-white mt-1" id="kpi-efficiency">0%</h3>
+                                </div>
+                                <div class="p-2 bg-green-900/50 rounded-lg text-green-400"><i data-lucide="bar-chart-2"></i></div>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-1.5 mt-4">
+                                <div id="kpi-eff-bar" class="bg-green-500 h-1.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="glass-panel p-5 rounded-xl border-t-2 border-t-accent-500 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform"><i data-lucide="tractor" class="w-24 h-24"></i></div>
+                            <div class="flex justify-between items-start relative z-10">
+                                <div>
+                                    <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Estado de Flota</p>
+                                    <h3 class="text-3xl font-display font-bold text-white mt-1" id="kpi-equip">0</h3>
+                                </div>
+                                <div class="p-2 bg-accent-500/20 rounded-lg text-accent-500"><i data-lucide="settings-2"></i></div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between text-xs font-medium">
+                                <button id="btn-filter-active" class="text-green-400 bg-green-400/10 px-2 py-1 rounded flex items-center hover:bg-green-400/20 transition-all border border-transparent outline-none"><i data-lucide="check-circle" class="w-3 h-3 mr-1"></i><span id="kpi-equip-active">0 Activos</span></button>
+                                <button id="btn-filter-inactive" class="text-red-400 bg-red-400/10 px-2 py-1 rounded flex items-center hover:bg-red-400/20 transition-all border border-transparent outline-none"><i data-lucide="x-circle" class="w-3 h-3 mr-1"></i><span id="kpi-equip-inactive">0 Inoperativos</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Main Chart -->
+                        <div class="glass-panel p-5 rounded-xl lg:col-span-2">
+                            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                                <div class="flex items-center space-x-3">
+                                    <h3 class="text-lg font-semibold text-white flex items-center">
+                                        <i data-lucide="bar-chart" class="w-5 h-5 mr-2 text-brand-500"></i>
+                                        Horas Reales vs Meta Operativa (8h)
+                                    </h3>
+                                    <!-- Interactive Chart Filter Badge -->
+                                    <span id="chartFilterBadge" class="hidden text-xs bg-brand-600/20 text-brand-400 border border-brand-600/50 px-2 py-1 rounded-full cursor-pointer hover:bg-brand-600/40 transition">
+                                        <span id="chartFilterName" class="font-bold mr-1"></span> 
+                                        <i data-lucide="x" class="w-3 h-3 inline"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="relative h-72 w-full">
+                                <canvas id="mainChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Chart -->
+                        <div class="glass-panel p-5 rounded-xl">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <i data-lucide="pie-chart" class="w-5 h-5 mr-2 text-accent-500"></i>
+                                Eficiencia de Flota
+                            </h3>
+                            <div class="relative h-60 w-full flex items-center justify-center">
+                                <canvas id="doughnutChart"></canvas>
+                            </div>
+                            <!-- Leyenda Detallada debajo del Grafico -->
+                            <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                                <div class="bg-dark-800/50 p-2.5 rounded-lg flex flex-col justify-center items-center border-t-2 border-green-500">
+                                    <span class="text-green-500 font-bold text-base whitespace-nowrap" id="stat-work">0.0 h</span>
+                                    <span class="text-gray-400 text-2xs uppercase tracking-wider font-semibold mt-1">Horas Trabajadas</span>
+                                </div>
+                                <div class="bg-dark-800/50 p-2.5 rounded-lg flex flex-col justify-center items-center border-t-2 border-red-500">
+                                    <span class="text-red-500 font-bold text-base whitespace-nowrap" id="stat-idle">0.0 h</span>
+                                    <span class="text-gray-400 text-2xs uppercase tracking-wider font-semibold mt-1">Tiempo Perdido</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- VIEW: DATA TABLE -->
+                <div id="view-data" class="app-view fade-in space-y-4">
+                    
+                    <!-- Table Controls -->
+                    <div class="glass-panel p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="relative w-full sm:w-72">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4"></i>
+                            <input type="text" id="searchInput" placeholder="Buscar equipo, flota, placa..." class="w-full bg-dark-900 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors">
+                        </div>
+                        
+                        <div class="flex space-x-2 w-full sm:w-auto">
+                            <button onclick="exportToPDF()" class="flex-1 sm:flex-none flex items-center justify-center space-x-2 bg-brand-900/30 hover:bg-brand-900/50 border border-brand-800 text-brand-400 px-4 py-2 rounded-lg text-sm transition-colors">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                <span class="hidden sm:inline">PDF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- The Table -->
+                    <div class="glass-panel rounded-xl overflow-hidden border border-gray-800">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse" id="dataTable">
+                                <thead>
+                                    <tr class="bg-dark-900/80 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
+                                        <th class="p-4 font-semibold">Equipo</th>
+                                        <th class="p-4 font-semibold">Flota</th>
+                                        <th class="p-4 font-semibold">Placa</th>
+                                        <th class="p-4 font-semibold text-right">Hrs Movimiento</th>
+                                        <th class="p-4 font-semibold text-center">Eficiencia (Base 8h)</th>
+                                        <th class="p-4 font-semibold">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" class="text-sm divide-y divide-gray-800/50">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 bg-dark-900/50 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
+                            <span id="recordCount">Mostrando 0 registros</span>
+                            <span class="flex items-center text-green-500"><i data-lucide="check" class="w-3 h-3 mr-1"></i> Sincronizado con Supabase</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN SUPABASE
+        // ==========================================
+        const SUPABASE_URL = 'https://roqeubrussnnwkgxarpd.supabase.co'; // URL de tu proyecto
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvcWV1YnJ1c3NubndrZ3hhcnBkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNDUyOTIsImV4cCI6MjA5MzgyMTI5Mn0.kdv74W1IrQbrogTKx699rafHK-y95Y93uSit1kh9i0E'; // Llave publica anon
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- State Management ---
+        let appData = [];
+        let filteredData = []; 
+        let currentDisplayData = []; 
+        let activeChartFilter = null; 
+        let activeStatusFilter = 'all'; // 'all', 'active', 'inactive'
+        let charts = {};
+
+        // --- DOM Elements ---
+        let els = {};
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup els here after DOM is loaded
+            els = {
+                toast: document.getElementById('toast'),
+                toastMsg: document.getElementById('toast-msg'),
+                loader: document.getElementById('global-loader'),
+                loaderMsg: document.getElementById('loader-msg'),
+                sidebar: document.getElementById('sidebar'),
+                mobileBtn: document.getElementById('mobile-menu-btn'),
+                views: document.querySelectorAll('.app-view'),
+                navBtns: document.querySelectorAll('.nav-btn'),
+                title: document.getElementById('page-title'),
+                fileInput: document.getElementById('excel-file'),
+                searchInput: document.getElementById('searchInput'),
+                tableBody: document.getElementById('tableBody'),
+                recordCount: document.getElementById('recordCount'),
+                // Filters
+                dateRangeSelect: document.getElementById('dateRangeSelect'),
+                customDateRange: document.getElementById('customDateRange'),
+                dateFrom: document.getElementById('dateFrom'),
+                dateTo: document.getElementById('dateTo'),
+                chartFilterBadge: document.getElementById('chartFilterBadge'),
+                chartFilterName: document.getElementById('chartFilterName'),
+                // KPIs
+                kpiHours: document.getElementById('kpi-hours'),
+                kpiEff: document.getElementById('kpi-efficiency'),
+                kpiEffBar: document.getElementById('kpi-eff-bar'),
+                kpiEquip: document.getElementById('kpi-equip'),
+                kpiEquipActive: document.getElementById('kpi-equip-active'),
+                kpiEquipInactive: document.getElementById('kpi-equip-inactive'),
+                btnFilterActive: document.getElementById('btn-filter-active'),
+                btnFilterInactive: document.getElementById('btn-filter-inactive'),
+                // Leyenda de Gráfica Circular
+                statWork: document.getElementById('stat-work'),
+                statIdle: document.getElementById('stat-idle')
+            };
+
+            lucide.createIcons();
+            Chart.register(ChartDataLabels);
+            setupEventListeners();
+            
+            // Inyectar Web App Manifest dinámicamente para soporte de Acceso Directo / PWA
+            injectDynamicManifest();
+
+            // REGISTRO DE SERVICE WORKER CON COMPROBACIÓN DE PROTOCOLO ESTÁNDAR HTTP/HTTPS
+            if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('sw.js')
+                        .then(reg => console.log('Service Worker registrado con éxito en el ámbito:', reg.scope))
+                        .catch(err => console.warn('No se pudo registrar el Service Worker (ejecución limitada):', err));
+                });
+            } else {
+                console.log('Service Worker omitido: Protocolo no soportado o entorno local/sandbox.');
+            }
+
+            // Cargar datos de la BD al abrir
+            fetchSupabaseData();
+        });
+
+        // Función para generar un Web App Manifest con el logotipo de Cadasa
+        function injectDynamicManifest() {
+            const manifestData = {
+                "short_name": "Cadasa Taller",
+                "name": "Cadasa - taller operaciones",
+                "icons": [
+                    {
+                        "src": "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png",
+                        "type": "image/png",
+                        "sizes": "192x192"
+                    },
+                    {
+                        "src": "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png",
+                        "type": "image/png",
+                        "sizes": "512x512"
+                    }
+                ],
+                "start_url": ".",
+                "background_color": "#0f172a",
+                "display": "standalone",
+                "theme_color": "#dc2626"
+            };
+            
+            const stringManifest = JSON.stringify(manifestData);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            
+            const linkTag = document.createElement('link');
+            linkTag.setAttribute('rel', 'manifest');
+            linkTag.setAttribute('href', manifestURL);
+            document.head.appendChild(linkTag);
+        }
+
+        function setupEventListeners() {
+            els.mobileBtn.addEventListener('click', () => els.sidebar.classList.toggle('-translate-x-full'));
+
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth < 768 && !els.sidebar.contains(e.target) && !els.mobileBtn.contains(e.target)) {
+                    els.sidebar.classList.add('-translate-x-full');
+                }
+            });
+
+            els.fileInput.addEventListener('change', handleFileUpload);
+            els.searchInput.addEventListener('input', applyFilters);
+            
+            els.dateRangeSelect.addEventListener('change', (e) => {
+                if(e.target.value === 'custom') {
+                    els.customDateRange.classList.remove('hidden');
+                    els.customDateRange.classList.add('flex');
+                } else {
+                    els.customDateRange.classList.add('hidden');
+                    els.customDateRange.classList.remove('flex');
+                    applyFilters();
+                }
+            });
+
+            els.dateFrom.addEventListener('change', applyFilters);
+            els.dateTo.addEventListener('change', applyFilters);
+
+            els.chartFilterBadge.addEventListener('click', () => {
+                activeChartFilter = null;
+                updateDashboard();
+            });
+
+            // Agregado interactividad a los botones de Activos / Inoperativos
+            els.btnFilterActive.addEventListener('click', () => {
+                activeStatusFilter = activeStatusFilter === 'active' ? 'all' : 'active';
+                activeChartFilter = null;
+                updateDashboard();
+            });
+            
+            els.btnFilterInactive.addEventListener('click', () => {
+                activeStatusFilter = activeStatusFilter === 'inactive' ? 'all' : 'inactive';
+                activeChartFilter = null;
+                updateDashboard();
+            });
+        }
+
+        // --- Navigation ---
+        window.switchView = function(viewId) {
+            els.views.forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            els.navBtns.forEach(btn => {
+                if(btn.dataset.target === viewId) {
+                    btn.classList.add('bg-dark-800/50', 'text-white', 'border-brand-600');
+                    btn.classList.remove('text-gray-400', 'border-transparent');
+                } else {
+                    btn.classList.remove('bg-dark-800/50', 'text-white', 'border-brand-600');
+                    btn.classList.add('text-gray-400', 'border-transparent');
+                }
+            });
+
+            els.title.textContent = viewId === 'dashboard' ? 'Centro de Operaciones' : 'Datos de Flota';
+
+            if(viewId === 'dashboard') {
+                renderMainChart(filteredData, activeChartFilter);
+                renderDoughnutChart(currentDisplayData);
+            }
+
+            if(window.innerWidth < 768) els.sidebar.classList.add('-translate-x-full');
+        };
+
+        // --- Utilities ---
+        function showToast(message, isError = false) {
+            els.toastMsg.textContent = message;
+            els.toast.classList.remove('border-brand-600', 'border-red-500');
+            els.toast.classList.add(isError ? 'border-red-500' : 'border-brand-600');
+            els.toast.classList.add('show');
+            setTimeout(() => els.toast.classList.remove('show'), 4500); // 4.5 segundos para dar tiempo de lectura
+        }
+
+        function showLoader(show, msg = "Analizando telemetría...") {
+            els.loaderMsg.textContent = msg;
+            els.loader.classList.toggle('hidden', !show);
+        }
+
+        function formatNumber(num, decimals = 1) {
+            return Number(num).toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // Formato para mostrar en tablas y PDFs
+        function getEfficiencyColor(eff) {
+            if (eff >= 85) return 'text-green-400 bg-green-400/10 border-green-400/20';
+            if (eff >= 70) return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+            return 'text-red-400 bg-red-400/10 border-red-400/20';
+        }
+
+        // --- Helper Date Formatter (dd/mm/aaaa) ---
+        function formatDateDDMMYYYY(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('T')[0].split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return dateStr;
+        }
+
+        // --- Supabase DB Fetch ---
+        window.fetchSupabaseData = async function() {
+            showLoader(true, "Descargando datos desde la nube...");
+            try {
+                // Verificar credenciales genericas por seguridad (para no hacer crash si están vacías)
+                if (SUPABASE_URL.includes("TU_SUPABASE")) {
+                    showLoader(false);
+                    showToast("Configura tus claves API de Supabase en el código.", true);
+                    return;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('telemetria')
+                    .select('*')
+                    .order('fecha', { ascending: false });
+
+                if (error) {
+                    if (error.code === '42501') {
+                        showToast("Error de seguridad RLS (42501): Ejecuta 'ALTER TABLE telemetria DISABLE ROW LEVEL SECURITY;' en el SQL Editor de Supabase.", true);
+                        throw error;
+                    }
+                    throw error;
+                }
+
+                // Mapear de formato BD a formato FrontEnd
+                appData = data.map(row => ({
+                    "Equipo": row.equipo,
+                    "Flota": row.flota,
+                    "Placa": row.placa,
+                    "Hrs Movimiento": parseFloat(row.hrs_movimiento),
+                    "Fecha": row.fecha
+                }));
+
+                els.dateRangeSelect.value = 'all';
+                els.customDateRange.classList.add('hidden');
+                els.customDateRange.classList.remove('flex');
+                
+                applyFilters();
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                showToast("Error de conexión a la base de datos.", true);
+            } finally {
+                showLoader(false);
+            }
+        }
+
+
+        // --- File Handling (SheetJS) & Supabase Insert ---
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showLoader(true, "Leyendo archivo...");
+            try {
+                const reader = new FileReader();
+                
+                // Hacer el callback asíncrono para permitir "await supabase.from..."
+                reader.onload = async function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        const jsonRaw = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+                        
+                        if (!jsonRaw || jsonRaw.length === 0) throw new Error("El archivo está vacío o no se pudo leer.");
+                        
+                        let globalDate = new Date().toISOString().split('T')[0];
+                        let globalYear = new Date().getFullYear();
+                        
+                        for (let i = 0; i < Math.min(jsonRaw.length, 10); i++) {
+                            const row = jsonRaw[i];
+                            if (!row || !Array.isArray(row)) continue;
+                            
+                            const desdeIdx = row.findIndex(cell => typeof cell === 'string' && cell.toLowerCase().trim() === 'desde');
+                            if (desdeIdx !== -1 && jsonRaw[i+1] && jsonRaw[i+1][desdeIdx]) {
+                                let dateStr = String(jsonRaw[i+1][desdeIdx]).trim();
+                                let justDate = dateStr.split(' ')[0];
+                                if (justDate.includes('/')) {
+                                    let parts = justDate.split('/');
+                                    if(parts.length >= 3) {
+                                        globalDate = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+                                        globalYear = parts[0];
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        
+                        let headerIdx = -1;
+                        let maxMatches = 0;
+                        const headerKeywords = ['equipo', 'nombre', 'placa', 'flota', 'fecha', 'tiempo', 'movimiento', 'consumo', 'operador', 'trabajo'];
+                        
+                        for (let i = 0; i < Math.min(jsonRaw.length, 20); i++) {
+                            const row = jsonRaw[i];
+                            if (!row || !Array.isArray(row)) continue;
+                            
+                            let matches = 0;
+                            row.forEach(cell => {
+                                if (typeof cell === 'string') {
+                                    const c = cell.toLowerCase();
+                                    if (headerKeywords.some(kw => c.includes(kw))) matches++;
+                                }
+                            });
+                            
+                            if (matches > maxMatches) {
+                                maxMatches = matches;
+                                headerIdx = i;
+                            }
+                        }
+
+                        // VALIDACIÓN 1: El archivo debe contener un encabezado descifrable
+                        if (headerIdx === -1 || maxMatches === 0) {
+                            throw new Error("El archivo no tiene un formato compatible. No se encontró la fila de encabezados con las columnas requeridas.");
+                        }
+
+                        const headers = jsonRaw[headerIdx] || [];
+                        
+                        // VALIDACIÓN 2: Verificar la existencia de las columnas críticas requeridas
+                        const normalizedHeaders = headers.map(h => h ? h.toString().trim().toLowerCase() : "");
+                        
+                        const hasEquipoColumn = normalizedHeaders.some(h => ['equipo', 'nombre', 'maquina', 'id'].some(kw => h.includes(kw)));
+                        const hasMovimientoColumn = normalizedHeaders.some(h => ['movimiento', 'trabajo', 'efectiva'].some(kw => h.includes(kw)));
+
+                        if (!hasEquipoColumn || !hasMovimientoColumn) {
+                            throw new Error("Estructura incompatible. El archivo debe contener al menos una columna para identificar el 'Equipo' y otra para las horas de 'Movimiento' / 'Trabajo'.");
+                        }
+
+                        const dataRows = jsonRaw.slice(headerIdx + 1);
+                        const normalizedData = [];
+                        
+                        dataRows.forEach(row => {
+                            if (!row || row.length === 0) return;
+                            
+                            const rowObj = {};
+                            headers.forEach((h, c) => {
+                                if(h) rowObj[h.toString().trim().toLowerCase()] = row[c];
+                            });
+                            
+                            const getVal = (keys) => {
+                                const foundKey = Object.keys(rowObj).find(k => keys.some(key => k.includes(key)));
+                                return foundKey ? rowObj[foundKey] : null;
+                            };
+
+                            const rawValues = Object.values(rowObj).map(v => String(v).toLowerCase());
+                            const isTotal = rawValues.some(v => v.includes('total'));
+                            if (isTotal) return;
+
+                            const parseTime = (val) => {
+                                if (!val) return 0;
+                                if (typeof val === 'number') {
+                                    if (val > 0 && val < 1) return val * 24; 
+                                    return val;
+                                }
+                                const strVal = String(val).trim();
+                                const parts = strVal.split(':');
+                                if (parts.length === 3) {
+                                    return parseInt(parts[0]) + (parseInt(parts[1]) / 60) + (parseInt(parts[2]) / 3600);
+                                } else if (parts.length === 2) {
+                                    return parseInt(parts[0]) + (parseInt(parts[1]) / 60);
+                                }
+                                return parseFloat(strVal) || 0;
+                            };
+
+                            const equipoRaw = getVal(['nombre', 'equipo', 'maquina', 'id']);
+                            if (!equipoRaw && Object.keys(rowObj).length < 3) return; 
+
+                            const equipo = (equipoRaw || 'Desconocido').toString().replace(/\s*\(.*?\)\s*/g, '').trim(); 
+                            const flota = getVal(['flota', 'modelo']) || '-';
+                            const placa = getVal(['placa', 'operador']) || '-';
+                            
+                            const hrsMovimiento = parseTime(getVal(['movimiento', 'trabajo', 'efectiva']));
+                            
+                            // EXTRAER LA FECHA DE LA COLUMNA "DESDE" DE FORMA PRIORITARIA
+                            const fechaVal = getVal(['desde', 'fecha', 'date']);
+                            let fechaStr = globalDate;
+                            
+                            if (typeof fechaVal === 'number') {
+                                // Caso número serializado de Excel
+                                const d = new Date(Math.round((fechaVal - 25569) * 86400 * 1000));
+                                if (!isNaN(d.getTime())) fechaStr = d.toISOString().split('T')[0];
+                            } else if (fechaVal) {
+                                let fStr = String(fechaVal).trim().split(' ')[0]; // Tomar solo la fecha, ignorar la hora
+                                if(fStr.includes('/') || fStr.includes('-')) {
+                                    const sep = fStr.includes('/') ? '/' : '-';
+                                    let parts = fStr.split(sep);
+                                    if (parts.length === 3) {
+                                        if (parts[0].length === 4) {
+                                            // Formato YYYY-MM-DD o YYYY/MM/DD
+                                            fechaStr = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+                                        } else if (parts[2].length === 4) {
+                                            // Formato DD-MM-YYYY o MM-DD-YYYY
+                                            let day = parts[0];
+                                            let month = parts[1];
+                                            let year = parts[2];
+                                            // Si el mes es superior a 12, asumimos formato americano MM/DD/YYYY
+                                            if (parseInt(month) > 12) {
+                                                day = parts[1];
+                                                month = parts[0];
+                                            }
+                                            fechaStr = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+                                        } else {
+                                            fechaStr = fStr;
+                                        }
+                                    } else if (parts.length === 2) {
+                                        // Formato MM/DD o DD/MM -> Usar año global
+                                        fechaStr = `${globalYear}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`;
+                                    }
+                                } else {
+                                    // Intentar procesar como fecha estándar
+                                    const parsedDate = new Date(fechaVal);
+                                    if (!isNaN(parsedDate.getTime())) {
+                                        fechaStr = parsedDate.toISOString().split('T')[0];
+                                    }
+                                }
+                            }
+
+                            normalizedData.push({
+                                "Equipo": equipo,
+                                "Flota": flota,
+                                "Placa": placa,
+                                "Hrs Movimiento": parseFloat(hrsMovimiento.toFixed(2)),
+                                "Fecha": fechaStr
+                            });
+                        });
+
+                        // VALIDACIÓN 3: Asegurarse de que se extrajo al menos una fila de datos procesables
+                        if (normalizedData.length === 0) {
+                            throw new Error("El archivo contiene cabeceras válidas pero no se pudieron interpretar filas de datos operacionales de tractores.");
+                        }
+
+                        showLoader(true, "Subiendo registros a Supabase...");
+
+                        // =====================================
+                        // INSERCIÓN A BASE DE DATOS (SUPABASE)
+                        // =====================================
+                        const dbPayload = normalizedData.map(row => ({
+                            equipo: row.Equipo,
+                            flota: row.Flota,
+                            placa: row.Placa,
+                            hrs_movimiento: row['Hrs Movimiento'],
+                            fecha: row.Fecha
+                        }));
+
+                        const { error } = await supabaseClient.from('telemetria').insert(dbPayload);
+                        
+                        if (error) {
+                            console.error("Supabase insert error:", error);
+                            if (error.code === '42501') {
+                                throw new Error("Error de seguridad RLS (Código 42501): La tabla 'telemetria' tiene activada la Seguridad de Fila en Supabase. Ve al SQL Editor de Supabase y ejecuta: ALTER TABLE telemetria DISABLE ROW LEVEL SECURITY;");
+                            }
+                            throw new Error("Error al intentar guardar la información en Supabase.");
+                        }
+
+                        showToast(`¡Éxito! ${dbPayload.length} registros guardados.`);
+                        
+                        // Recargar todo desde la BD
+                        await fetchSupabaseData();
+                        switchView('data');
+
+                    } catch (error) {
+                        console.error(error);
+                        showToast(error.message || "Error al procesar el archivo.", true);
+                    } finally {
+                        showLoader(false);
+                        els.fileInput.value = ''; 
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showLoader(false);
+                    showToast("Error al intentar leer el archivo local.", true);
+                };
+                
+                reader.readAsArrayBuffer(file);
+
+            } catch (error) {
+                console.error(error);
+                showToast("Error de acceso al archivo.", true);
+                showLoader(false);
+                els.fileInput.value = '';
+            }
+        }
+
+        // --- Filtering Engine ---
+        function applyFilters() {
+            let result = [...appData];
+
+            const dateFilter = els.dateRangeSelect.value;
+            if (dateFilter !== 'all') {
+                const today = new Date();
+                today.setHours(0,0,0,0);
+
+                result = result.filter(row => {
+                    if (!row.Fecha) return false;
+                    const rowDate = new Date(row.Fecha + "T00:00:00"); 
+
+                    if (dateFilter === 'today') {
+                        return rowDate.getTime() === today.getTime();
+                    } else if (dateFilter === 'yesterday') {
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        return rowDate.getTime() === yesterday.getTime();
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(today);
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        return rowDate >= weekAgo && rowDate <= today;
+                    } else if (dateFilter === 'month') {
+                        return rowDate.getMonth() === today.getMonth() && rowDate.getFullYear() === today.getFullYear();
+                    } else if (dateFilter === 'custom') {
+                        const fDate = els.dateFrom.value ? new Date(els.dateFrom.value + "T00:00:00") : null;
+                        const tDate = els.dateTo.value ? new Date(els.dateTo.value + "T23:59:59") : null;
+
+                        if (fDate && rowDate < fDate) return false;
+                        if (tDate && rowDate > tDate) return false;
+                        return true;
+                    }
+                    return true;
+                });
+            }
+
+            const searchTerm = els.searchInput.value.toLowerCase();
+            if (searchTerm) {
+                result = result.filter(row => 
+                    String(row.Equipo).toLowerCase().includes(searchTerm) ||
+                    String(row.Flota).toLowerCase().includes(searchTerm) ||
+                    String(row.Placa).toLowerCase().includes(searchTerm)
+                );
+            }
+
+            filteredData = result;
+            
+            filteredData.forEach(row => {
+                row['Eficiencia'] = (row['Hrs Movimiento'] / 8) * 100;
+            });
+
+            activeChartFilter = null; 
+            activeStatusFilter = 'all'; // Limpiar el filtro de estado al cambiar las fechas
+            updateDashboard();
+        }
+
+        // Funcion puente que orquesta todos los elementos visuales
+        function updateDashboard() {
+            // Aplicar Filtro de Estado (Activos / Inoperativos)
+            let equipStatusMap = new Map();
+            filteredData.forEach(row => {
+                let eq = row['Equipo'];
+                if (!equipStatusMap.has(eq)) equipStatusMap.set(eq, 0);
+                equipStatusMap.set(eq, equipStatusMap.get(eq) + (row['Hrs Movimiento'] || 0));
+            });
+
+            let statusFilteredData = filteredData;
+            if (activeStatusFilter === 'active') {
+                statusFilteredData = filteredData.filter(r => equipStatusMap.get(r.Equipo) > 0);
+            } else if (activeStatusFilter === 'inactive') {
+                statusFilteredData = filteredData.filter(r => equipStatusMap.get(r.Equipo) === 0);
+            }
+
+            // Aplicar Filtro Especifico por Gráfica
+            currentDisplayData = activeChartFilter ? 
+                statusFilteredData.filter(r => r.Equipo === activeChartFilter) : 
+                statusFilteredData;
+
+            // Visualizaciones
+            if (activeChartFilter) {
+                els.chartFilterBadge.classList.remove('hidden');
+                els.chartFilterBadge.classList.add('inline-flex');
+                els.chartFilterName.textContent = activeChartFilter;
+            } else {
+                els.chartFilterBadge.classList.add('hidden');
+                els.chartFilterBadge.classList.remove('inline-flex');
+            }
+
+            // Actualizar estilo visual de los botones de activos/inactivos
+            if(activeStatusFilter === 'active') {
+                els.btnFilterActive.classList.add('border-green-400');
+                els.btnFilterInactive.classList.remove('border-red-400');
+                els.btnFilterInactive.classList.add('opacity-40');
+                els.btnFilterActive.classList.remove('opacity-40');
+            } else if(activeStatusFilter === 'inactive') {
+                els.btnFilterInactive.classList.add('border-red-400');
+                els.btnFilterActive.classList.remove('border-green-400');
+                els.btnFilterActive.classList.add('opacity-40');
+                els.btnFilterInactive.classList.remove('opacity-40');
+            } else {
+                els.btnFilterActive.classList.remove('border-green-400', 'opacity-40');
+                els.btnFilterInactive.classList.remove('border-red-400', 'opacity-40');
+            }
+
+            updateKPIs(currentDisplayData, filteredData); // Mandamos los datos con estado y los base
+            renderTable(currentDisplayData);
+            renderMainChart(statusFilteredData, activeChartFilter);
+            renderDoughnutChart(currentDisplayData);
+        }
+
+        // --- Core UI Updates ---
+        function updateKPIs(displayData, baseData) {
+            if(displayData.length === 0 && (!baseData || baseData.length === 0)) {
+                animateValue(els.kpiHours, 0, 0, 500, '', ' h');
+                animateValue(els.kpiEff, 0, 0, 500, '', '%');
+                els.kpiEffBar.style.width = '0%';
+                els.kpiEquip.textContent = '0';
+                if(els.kpiEquipActive) els.kpiEquipActive.textContent = '0 Activos';
+                if(els.kpiEquipInactive) els.kpiEquipInactive.textContent = '0 Inoperativos';
+                return;
+            }
+
+            // Métricas calculadas basadas en los filtros aplicados
+            let tWork = 0;
+            displayData.forEach(row => {
+                tWork += row['Hrs Movimiento'] || 0;
+            });
+
+            let totalRecords = displayData.length;
+            let totalCapacity = totalRecords * 8; 
+
+            let avgEff = totalCapacity > 0 ? (tWork / totalCapacity) * 100 : 0;
+            
+            // MODIFICACIÓN: Cálculo del promedio en lugar de la suma acumulada
+            let avgWork = totalRecords > 0 ? (tWork / totalRecords) : 0;
+
+            animateValue(els.kpiHours, 0, avgWork, 1000, '', ' h');
+            animateValue(els.kpiEff, 0, avgEff, 1000, '', '%');
+            
+            els.kpiEffBar.style.width = `${Math.min(avgEff, 100)}%`; 
+            if(avgEff < 70) els.kpiEffBar.className = "h-1.5 rounded-full bg-red-500 transition-all duration-1000";
+            else if(avgEff < 85) els.kpiEffBar.className = "h-1.5 rounded-full bg-yellow-500 transition-all duration-1000";
+            else els.kpiEffBar.className = "h-1.5 rounded-full bg-green-500 transition-all duration-1000";
+
+            // Cálculo del Estado de Flota (Anclado a baseData para que los botones mantengan consistencia global)
+            let safeBaseData = baseData && baseData.length > 0 ? baseData : displayData;
+            let uniqueEquipsMap = new Map();
+
+            safeBaseData.forEach(row => {
+                let eq = row['Equipo'];
+                if (!uniqueEquipsMap.has(eq)) uniqueEquipsMap.set(eq, 0);
+                uniqueEquipsMap.set(eq, uniqueEquipsMap.get(eq) + (row['Hrs Movimiento'] || 0));
+            });
+
+            let totalEquipos = uniqueEquipsMap.size;
+            let eqActivos = 0;
+            let eqInoperativos = 0;
+
+            uniqueEquipsMap.forEach(hrs => {
+                if (hrs > 0) eqActivos++; else eqInoperativos++;
+            });
+
+            els.kpiEquip.textContent = totalEquipos;
+            if(els.kpiEquipActive) els.kpiEquipActive.textContent = `${eqActivos} Activos`;
+            if(els.kpiEquipInactive) els.kpiEquipInactive.textContent = `${eqInoperativos} Inoperativos`;
+        }
+
+        function renderTable(data) {
+            els.tableBody.innerHTML = '';
+            
+            if(data.length === 0) {
+                els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-gray-500">No se encontraron datos para el filtro actual</td></tr>`;
+                els.recordCount.textContent = `Mostrando 0 registros`;
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-dark-800/80 transition-colors cursor-default group";
+                const effClass = getEfficiencyColor(row['Eficiencia']);
+                const displayDate = formatDateDDMMYYYY(row['Fecha']);
+                
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-white flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-brand-500 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        ${row['Equipo']}
+                    </td>
+                    <td class="p-4 text-gray-400">${row['Flota']}</td>
+                    <td class="p-4 text-gray-300">${row['Placa']}</td>
+                    <td class="p-4 text-right font-display font-semibold text-gray-200">${formatNumber(row['Hrs Movimiento'])}</td>
+                    <td class="p-4 text-center">
+                        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-bold border ${effClass}" title="Calculado sobre 8hrs de trabajo">
+                            ${formatNumber(row['Eficiencia'])}%
+                        </span>
+                    </td>
+                    <td class="p-4 text-gray-500 text-sm whitespace-nowrap">${displayDate}</td>
+                `;
+                fragment.appendChild(tr);
+            });
+            els.tableBody.appendChild(fragment);
+            els.recordCount.textContent = `Mostrando ${data.length} registros`;
+        }
+
+        // --- Chart.js Integration ---
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Inter, sans-serif';
+        
+        function renderMainChart(data, activeFilter = null) {
+            if(charts.main) charts.main.destroy();
+            if(data.length === 0) return;
+
+            const modelStats = {};
+            data.forEach(row => {
+                let m = row['Equipo'];
+                if(!modelStats[m]) modelStats[m] = { work: 0, count: 0 };
+                modelStats[m].work += row['Hrs Movimiento'];
+                modelStats[m].count += 1;
+            });
+
+            const labels = Object.keys(modelStats).slice(0, 12);
+            const workData = labels.map(l => modelStats[l].work);
+            const targetData = labels.map(l => modelStats[l].count * 8);
+
+            const ctxMain = document.getElementById('mainChart').getContext('2d');
+            let gradient = ctxMain.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(220, 38, 38, 0.8)'); 
+            gradient.addColorStop(1, 'rgba(220, 38, 38, 0.2)');
+
+            const bgColors = labels.map(l => {
+                if (!activeFilter || activeFilter === l) return gradient;
+                return 'rgba(220, 38, 38, 0.1)';
+            });
+
+            charts.main = new Chart(ctxMain, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Horas Reales (Movimiento)',
+                            data: workData,
+                            backgroundColor: bgColors,
+                            borderRadius: 4,
+                            yAxisID: 'y',
+                            datalabels: {
+                                display: true,
+                                anchor: 'end',
+                                align: 'top',
+                                color: (ctx) => {
+                                    let l = ctx.chart.data.labels[ctx.dataIndex];
+                                    return (!activeFilter || activeFilter === l) ? '#f8fafc' : 'rgba(248, 250, 252, 0.3)';
+                                },
+                                font: { family: 'Inter', size: 10, weight: 'bold' },
+                                formatter: function(value, context) {
+                                    if(value === 0) return '';
+                                    let target = targetData[context.dataIndex];
+                                    let eff = target > 0 ? ((value / target) * 100).toFixed(0) : 0;
+                                    return value.toFixed(1) + 'h\n(' + eff + '%)';
+                                },
+                                textAlign: 'center'
+                            }
+                        },
+                        {
+                            label: 'Meta Operativa Dinámica (8h/día)',
+                            data: targetData,
+                            type: 'line',
+                            borderColor: '#3b82f6', 
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5], 
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            fill: false,
+                            yAxisID: 'y',
+                            datalabels: { display: false }
+                        }
+                    ]
+                },
+                options: {
+                    layout: { padding: { top: 30 } },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (event, elements) => {
+                        if (elements && elements.length > 0) {
+                            const clickedIdx = elements[0].index;
+                            const clickedLabel = labels[clickedIdx];
+                            activeChartFilter = (activeChartFilter === clickedLabel) ? null : clickedLabel;
+                            updateDashboard();
+                        } else {
+                            if (activeChartFilter) {
+                                activeChartFilter = null;
+                                updateDashboard();
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14, family: 'Rajdhani' },
+                            padding: 12,
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        y: { 
+                            type: 'linear', display: true, position: 'left',
+                            suggestedMax: 10, 
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            title: { display: true, text: 'Horas' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDoughnutChart(data) {
+            if(charts.doughnut) charts.doughnut.destroy();
+            
+            if(data.length === 0) {
+                if (els.statWork) els.statWork.textContent = '0.0 h';
+                if (els.statIdle) els.statIdle.textContent = '0.0 h';
+                return;
+            }
+
+            let tWorkAll = data.reduce((sum, r) => sum + r['Hrs Movimiento'], 0);
+            let tCapacityAll = data.length * 8; 
+            let tGapAll = Math.max(0, tCapacityAll - tWorkAll);
+            
+            if (els.statWork) {
+                els.statWork.textContent = `${formatNumber(tWorkAll, 1)} h`;
+            }
+            if (els.statIdle) {
+                els.statIdle.textContent = `${formatNumber(tGapAll, 1)} h`;
+            }
+
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            
+            const centerTextPlugin = {
+                id: 'centerText',
+                beforeDraw: function(chart) {
+                    let width = chart.width,
+                        height = chart.height,
+                        ctx = chart.ctx;
+
+                    ctx.restore();
+                    
+                    let fontSize = 1.6; 
+                    ctx.font = "bold " + fontSize + "em Inter, sans-serif";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#ffffff";
+                    
+                    let totalHours = tWorkAll + tGapAll; 
+                    let text = formatNumber(totalHours, 1) + " h",
+                        textX = Math.round((width - ctx.measureText(text).width) / 2),
+                        textY = height / 2 - 8;
+                        
+                    ctx.fillText(text, textX, textY);
+                    
+                    let subFontSize = 0.75;
+                    ctx.font = "600 " + subFontSize + "em Inter, sans-serif";
+                    ctx.fillStyle = "#94a3b8"; 
+                    let subText = "Total Horas",
+                        subTextX = Math.round((width - ctx.measureText(subText).width) / 2);
+                        
+                    ctx.fillText(subText, subTextX, textY + 24);
+                    
+                    ctx.save();
+                }
+            };
+
+            charts.doughnut = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Horas Trabajadas', 'Tiempo Perdido'], 
+                    datasets: [{
+                        data: [tWorkAll, tGapAll],
+                        backgroundColor: ['#22c55e', '#ef4444'], 
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%', 
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { 
+                            display: true, 
+                            color: '#ffffff',
+                            font: { family: 'Inter', weight: 'bold', size: 10 },
+                            formatter: function(value) {
+                                if(value === 0) return '';
+                                let total = tWorkAll + tGapAll;
+                                let pct = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                                return value.toFixed(1) + 'h\n(' + pct + '%)';
+                            },
+                            textAlign: 'center'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw;
+                                    let total = tWorkAll + tGapAll;
+                                    let pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${value.toFixed(1)}h (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [centerTextPlugin] 
+            });
+        }
+
+        // --- Export Functions ---
+        function exportToExcel() {
+            if(currentDisplayData.length === 0) return showToast("No hay datos para exportar", true);
+            
+            const exportData = currentDisplayData.map(row => ({
+                "Equipo": row.Equipo,
+                "Flota": row.Flota,
+                "Placa": row.Placa,
+                "Hrs Movimiento": row['Hrs Movimiento'],
+                "Eficiencia Base 8h (%)": formatNumber(row.Eficiencia, 2),
+                "Fecha": row.Fecha
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Reporte Horas Flota");
+            XLSX.writeFile(wb, `Telematica_Horas_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast("Excel exportado exitosamente");
+        }
+
+        window.exportToPDF = function() {
+            if(currentDisplayData.length === 0) return showToast("No hay datos para exportar", true);
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFillColor(15, 23, 42); 
+            doc.rect(0, 0, 210, 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text("Cadasa - Taller Operaciones", 14, 20);
+            
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(10);
+            let filterText = els.dateRangeSelect.options[els.dateRangeSelect.selectedIndex].text;
+            let filterSubText = activeChartFilter ? ` | Equipo: ${activeChartFilter}` : '';
+            doc.text(`Periodo: ${filterText}${filterSubText} | Generado: ${new Date().toLocaleString()}`, 14, 38);
+
+            const tableColumn = ["Equipo", "Flota", "Placa", "Hrs Mov.", "Efic. (8h)"];
+            const tableRows = [];
+
+            currentDisplayData.forEach(row => {
+                const rowData = [
+                    row.Equipo,
+                    row.Flota,
+                    row.Placa,
+                    formatNumber(row['Hrs Movimiento']),
+                    formatNumber(row.Eficiencia) + '%'
+                ];
+                tableRows.push(rowData);
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 45,
+                theme: 'grid',
+                styles: { font: 'helvetica', fontSize: 8, textColor: [40, 40, 40] },
+                headStyles: { fillColor: [220, 38, 38], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [245, 245, 245] }
+            });
+
+            doc.save(`Reporte_Horas_${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast("PDF exportado exitosamente");
+        }
+
+        function animateValue(obj, start, end, duration, prefix = '', suffix = '') {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const easeProgress = progress * (2 - progress); 
+                const current = start + easeProgress * (end - start);
+                
+                let displayVal = current;
+                if(end > 1000) displayVal = Math.round(current);
+                else displayVal = current.toFixed(1);
+
+                obj.innerHTML = `${prefix}${Number(displayVal).toLocaleString('es-ES')}${suffix}`;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    let finalVal = end > 1000 ? Math.round(end) : end.toFixed(1);
+                    obj.innerHTML = `${prefix}${Number(finalVal).toLocaleString('es-ES')}${suffix}`;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>
