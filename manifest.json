@@ -1,22 +1,22 @@
 {
-"short_name": "Cadasa Taller",
-"name": "Cadasa - taller operaciones",
-"description": "Plataforma operacional de telemetría e inteligencia de flota de Cadasa.",
-"icons": [
-{
-"src": "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png",
-"type": "image/png",
-"sizes": "192x192"
-},
-{
-"src": "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png",
-"type": "image/png",
-"sizes": "512x512"
-}
-],
-"start_url": "index.html",
-"background_color": "#0f172a",
-"display": "standalone",
-"theme_color": "#dc2626",
-"orientation": "any"
+  "short_name": "Cadasa Taller",
+  "name": "Cadasa - Taller Operaciones",
+  "description": "Plataforma operacional de telemetría e inteligencia de flota de Cadasa.",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%231e293b'/><rect x='15' y='15' width='482' height='482' rx='105' fill='none' stroke='%23dc2626' stroke-width='15'/><radialGradient id='glow' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='%23dc2626' stop-opacity='0.6'/><stop offset='100%' stop-color='%231e293b' stop-opacity='0'/></radialGradient><circle cx='256' cy='256' r='220' fill='url(%23glow)'/><g fill='%23475569' opacity='0.3'><circle cx='256' cy='256' r='120' stroke='%23475569' stroke-width='25' fill='none'/><path d='M241 80h30v40h-30zm0 312h30v40h-30zM80 241h40v30H80zm312 0h40v30h-40z'/><path d='M135 135l28 28l-21 21l-28-28zm214 214l28 28l-21 21l-28-28z'/><path d='M349 135l28 28l-21 21l-28-28zM135 349l28 28l-21 21l-28-28z'/></g><g transform='translate(256, 256) rotate(-35) translate(-256, -256)' opacity='0.9'><rect x='236' y='80' width='40' height='352' rx='8' fill='%23e2e8f0' stroke='%23475569' stroke-width='6'/><circle cx='256' cy='80' r='50' fill='%23e2e8f0' stroke='%23475569' stroke-width='6'/><polygon points='236,35 276,35 276,85 256,105 236,85' fill='%231e293b'/><circle cx='256' cy='432' r='45' fill='%23e2e8f0' stroke='%23475569' stroke-width='6'/><circle cx='256' cy='432' r='22' fill='%231e293b'/></g><g transform='translate(76, 126)'><path d='M220,180 L320,180 L320,100 L240,100 L230,130 L150,130 L150,180 Z' fill='%23f8fafc' stroke='%23dc2626' stroke-width='12' stroke-linejoin='round'/><rect x='250' y='115' width='50' height='40' rx='4' fill='%231e293b' stroke='%23f8fafc' stroke-width='6'/><rect x='100' y='130' width='50' height='50' fill='%23e2e8f0' stroke='%23dc2626' stroke-width='10'/><line x1='125' y1='130' x2='125' y2='70' stroke='%23f8fafc' stroke-width='12' stroke-linecap='round'/><line x1='125' y1='70' x2='140' y2='70' stroke='%23f8fafc' stroke-width='8' stroke-linecap='round'/><circle cx='310' cy='190' r='65' fill='%230f172a' stroke='%23f8fafc' stroke-width='12'/><circle cx='310' cy='190' r='25' fill='%23dc2626'/><circle cx='310' cy='190' r='8' fill='%23f8fafc'/><circle cx='120' cy='210' r='45' fill='%230f172a' stroke='%23f8fafc' stroke-width='10'/><circle cx='120' cy='210' r='18' fill='%23dc2626'/><circle cx='120' cy='210' r='6' fill='%23f8fafc'/></g></svg>",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%231e293b'/><rect x='15' y='15' width='482' height='482' rx='105' fill='none' stroke='%23dc2626' stroke-width='15'/><radialGradient id='glow' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='%23dc2626' stop-opacity='0.6'/><stop offset='100%' stop-color='%231e293b' stop-opacity='0'/></radialGradient><circle cx='256' cy='256' r='220' fill='url(%23glow)'/><g fill='%23475569' opacity='0.3'><circle cx='256' cy='256' r='120' stroke='%23475569' stroke-width='25' fill='none'/><path d='M241 80h30v40h-30zm0 312h30v40h-30zM80 241h40v30H80zm312 0h40v30h-40z'/><path d='M135 135l28 28l-21 21l-28-28zm214 214l28 28l-21 21l-28-28z'/><path d='M349 135l28 28l-21 21l-28-28zM135 349l28 28l-21 21l-28-28z'/></g><g transform='translate(256, 256) rotate(-35) translate(-256, -256)' opacity='0.9'><rect x='236' y='80' width='40' height='352' rx='8' fill='%23e2e8f0' stroke='%23475569' stroke-width='6'/><circle cx='256' cy='80' r='50' fill='%23e2e8f0' stroke='%23475569' stroke-width='6'/><polygon points='236,35 276,35 276,85 256,105 236,85' fill='%231e293b'/><circle cx='256' cy='432' r='45' fill='%23e2e8f0' stroke='%23475569' stroke-width='6'/><circle cx='256' cy='432' r='22' fill='%231e293b'/></g><g transform='translate(76, 126)'><path d='M220,180 L320,180 L320,100 L240,100 L230,130 L150,130 L150,180 Z' fill='%23f8fafc' stroke='%23dc2626' stroke-width='12' stroke-linejoin='round'/><rect x='250' y='115' width='50' height='40' rx='4' fill='%231e293b' stroke='%23f8fafc' stroke-width='6'/><rect x='100' y='130' width='50' height='50' fill='%23e2e8f0' stroke='%23dc2626' stroke-width='10'/><line x1='125' y1='130' x2='125' y2='70' stroke='%23f8fafc' stroke-width='12' stroke-linecap='round'/><line x1='125' y1='70' x2='140' y2='70' stroke='%23f8fafc' stroke-width='8' stroke-linecap='round'/><circle cx='310' cy='190' r='65' fill='%230f172a' stroke='%23f8fafc' stroke-width='12'/><circle cx='310' cy='190' r='25' fill='%23dc2626'/><circle cx='310' cy='190' r='8' fill='%23f8fafc'/><circle cx='120' cy='210' r='45' fill='%230f172a' stroke='%23f8fafc' stroke-width='10'/><circle cx='120' cy='210' r='18' fill='%23dc2626'/><circle cx='120' cy='210' r='6' fill='%23f8fafc'/></g></svg>",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "theme_color": "#dc2626",
+  "orientation": "any"
 }
