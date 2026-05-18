@@ -1,0 +1,22 @@
+{
+"short_name": "Cadasa Taller",
+"name": "Cadasa - taller operaciones",
+"description": "Plataforma operacional de telemetría e inteligencia de flota de Cadasa.",
+"icons": [
+{
+"src": "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png",
+"type": "image/png",
+"sizes": "192x192"
+},
+{
+"src": "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png",
+"type": "image/png",
+"sizes": "512x512"
+}
+],
+"start_url": "index.html",
+"background_color": "#0f172a",
+"display": "standalone",
+"theme_color": "#dc2626",
+"orientation": "any"
+}
