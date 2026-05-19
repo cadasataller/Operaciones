@@ -12,11 +12,11 @@
     <meta name="theme-color" content="#dc2626">
     
     <!-- Enlace al Web App Manifest para PWA -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2FkYXNhIFRhbGxlciIsInNob3J0X25hbWUiOiJDYWRhc2EiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBmMTcyYSIsInRoZW1lX2NvbG9yIjoiI2RjMjYyNiIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3JvcWV1YnJ1c3NubndrZ3hhcnBkLnN1cGFiYXNlLmNvL3N0b3JhZ2UvdjEvb2JqZWN0L3B1YmxpYy9JTUFHRU5FUy9TY3JlZW5zaG90XzMtcmVtb3ZlYmctcHJldmlldyUyMCgyKS5wbmciLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9LHsic3JjIjoiaHR0cHM6Ly9yb3FldWJydXNzbm53a2d4YXJwZC5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvSU1BR0VORVMvU2NyZWVuc2hvdF8zLXJlbW92ZWJnLXByZXZpZXclMjAoMikucG5nIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
     
     <!-- Íconos de la App -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230f172a'/%3E%3Crect x='24' y='24' width='464' height='464' rx='80' fill='none' stroke='%23dc2626' stroke-width='24'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial, sans-serif' font-size='220' font-weight='bold' fill='%23dc2626' dominant-baseline='middle' text-anchor='middle'%3ECT%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230f172a'/%3E%3Crect x='24' y='24' width='464' height='464' rx='80' fill='none' stroke='%23dc2626' stroke-width='24'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial, sans-serif' font-size='220' font-weight='bold' fill='%23dc2626' dominant-baseline='middle' text-anchor='middle'%3ECT%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" href="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png">
+    <link rel="apple-touch-icon" href="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -505,57 +505,25 @@
             Chart.register(ChartDataLabels);
             setupEventListeners();
             
-            // Inyectar Web App Manifest dinámicamente para soporte de Acceso Directo / PWA
-            injectDynamicManifest();
-
-            // REGISTRO DE SERVICE WORKER CON COMPROBACIÓN DE PROTOCOLO ESTÁNDAR HTTP/HTTPS
-            if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+            // PWA Y SERVICE WORKER AUTO-CONTENIDO (Sin depender de archivos externos)
+            if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('sw.js')
-                        .then(reg => console.log('Service Worker registrado con éxito en el ámbito:', reg.scope))
-                        .catch(err => console.warn('No se pudo registrar el Service Worker (ejecución limitada):', err));
+                    const swCode = `
+                        self.addEventListener('install', (e) => self.skipWaiting());
+                        self.addEventListener('activate', (e) => self.clients.claim());
+                        self.addEventListener('fetch', (e) => {});
+                    `;
+                    const blob = new Blob([swCode], {type: 'application/javascript'});
+                    const swUrl = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(swUrl)
+                        .then(() => console.log('Service Worker de PWA registrado correctamente.'))
+                        .catch(err => console.warn('PWA SW Error:', err));
                 });
-            } else {
-                console.log('Service Worker omitido: Protocolo no soportado o entorno local/sandbox.');
             }
 
             // Cargar datos de la BD al abrir
             fetchSupabaseData();
         });
-
-        // Función para generar un Web App Manifest con el nuevo logotipo personalizado (Tractor + Llave)
-        function injectDynamicManifest() {
-            const logoUrl = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230f172a'/%3E%3Crect x='24' y='24' width='464' height='464' rx='80' fill='none' stroke='%23dc2626' stroke-width='24'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial, sans-serif' font-size='220' font-weight='bold' fill='%23dc2626' dominant-baseline='middle' text-anchor='middle'%3ECT%3C/text%3E%3C/svg%3E";
-            const manifestData = {
-                "short_name": "Cadasa Taller",
-                "name": "Cadasa - taller operaciones",
-                "icons": [
-                    {
-                        "src": logoUrl,
-                        "type": "image/svg+xml",
-                        "sizes": "192x192"
-                    },
-                    {
-                        "src": logoUrl,
-                        "type": "image/svg+xml",
-                        "sizes": "512x512"
-                    }
-                ],
-                "start_url": ".",
-                "background_color": "#0f172a",
-                "display": "standalone",
-                "theme_color": "#dc2626"
-            };
-            
-            const stringManifest = JSON.stringify(manifestData);
-            const blob = new Blob([stringManifest], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            
-            const linkTag = document.createElement('link');
-            linkTag.setAttribute('rel', 'manifest');
-            linkTag.setAttribute('href', manifestURL);
-            document.head.appendChild(linkTag);
-        }
 
         // Función para rellenar el desplegable de Equipos automáticamente
         function populateEquipoFilter(data) {
