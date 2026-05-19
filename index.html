@@ -15,8 +15,8 @@
     <link rel="manifest" href="manifest.json">
     
     <!-- Íconos de la App -->
-    <link rel="icon" type="image/png" href="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png">
-    <link rel="apple-touch-icon" href="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230f172a'/%3E%3Crect x='24' y='24' width='464' height='464' rx='80' fill='none' stroke='%23dc2626' stroke-width='24'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial, sans-serif' font-size='220' font-weight='bold' fill='%23dc2626' dominant-baseline='middle' text-anchor='middle'%3ECT%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230f172a'/%3E%3Crect x='24' y='24' width='464' height='464' rx='80' fill='none' stroke='%23dc2626' stroke-width='24'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial, sans-serif' font-size='220' font-weight='bold' fill='%23dc2626' dominant-baseline='middle' text-anchor='middle'%3ECT%3C/text%3E%3C/svg%3E">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -157,7 +157,11 @@
             <!-- Logo -->
             <div class="h-16 flex items-center px-4 border-b border-gray-800">
                 <div class="flex items-center space-x-2 text-white">
-                    <img src="https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png" alt="Logo Cadasa" class="w-9 h-9 object-contain" onerror="this.style.display='none'">
+                    <svg viewBox="0 0 512 512" class="w-9 h-9 object-contain">
+                        <rect width="512" height="512" rx="100" fill="#0f172a"/>
+                        <rect x="24" y="24" width="464" height="464" rx="80" fill="none" stroke="#dc2626" stroke-width="24"/>
+                        <text x="50%" y="55%" font-family="Arial, sans-serif" font-size="220" font-weight="bold" fill="#dc2626" dominant-baseline="middle" text-anchor="middle">CT</text>
+                    </svg>
                     <span class="font-display font-bold text-base tracking-wide uppercase">CADASA <span class="text-brand-600">TALLER</span></span>
                 </div>
             </div>
@@ -521,19 +525,19 @@
 
         // Función para generar un Web App Manifest con el nuevo logotipo personalizado (Tractor + Llave)
         function injectDynamicManifest() {
-            const logoUrl = "https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png";
+            const logoUrl = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230f172a'/%3E%3Crect x='24' y='24' width='464' height='464' rx='80' fill='none' stroke='%23dc2626' stroke-width='24'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial, sans-serif' font-size='220' font-weight='bold' fill='%23dc2626' dominant-baseline='middle' text-anchor='middle'%3ECT%3C/text%3E%3C/svg%3E";
             const manifestData = {
                 "short_name": "Cadasa Taller",
                 "name": "Cadasa - taller operaciones",
                 "icons": [
                     {
                         "src": logoUrl,
-                        "type": "image/png",
+                        "type": "image/svg+xml",
                         "sizes": "192x192"
                     },
                     {
                         "src": logoUrl,
-                        "type": "image/png",
+                        "type": "image/svg+xml",
                         "sizes": "512x512"
                     }
                 ],
