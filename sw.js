@@ -1,4 +1,5 @@
 const CACHE_NAME = 'cadasa-taller-cache-v2';
+const CACHE_NAME = 'cadasa-taller-cache-v3';
 const ASSETS_TO_CACHE = [
   'index.html',
   'manifest.json',
@@ -9,8 +10,7 @@ const ASSETS_TO_CACHE = [
   'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://roqeubrussnnwkgxarpd.supabase.co/storage/v1/object/public/IMAGENES/Screenshot_3-removebg-preview%20(2).png'
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 
 // Instalar el Service Worker y almacenar recursos en la caché
